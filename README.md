@@ -5,7 +5,8 @@
 Регистрация в системе `https://lp85d.ru/wp-admin/`  
 Плагин для браузера `https://github.com/dictovod/Ai-Browser-Remote-Control/`  
 <img width="365" height="527" alt="image" src="https://github.com/user-attachments/assets/3ffe969f-ec2c-4bcb-9b9a-a4e789f1c71c" />
-Вижу форму. Поля по порядку: 1-Имя, 2-Email, 3-Пароль, 4-Возраст, 5-Комментарий (textarea). Вот все команды для проверки:
+
+Вижу форму. Поля по порядку: 1-Имя, 2-Email, 3-Пароль, 4-Возраст, 5-Комментарий (textarea). Вот все команды для проверки:  
 
 ---
 
