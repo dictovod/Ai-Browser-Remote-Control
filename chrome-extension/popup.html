@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browser Remote Control</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Manrope:wght@500;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 360px;
+      font-family: 'Manrope', sans-serif;
+      font-size: 12px;
+      background: #0d1117;
+      color: #c9d1d9;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+      border-bottom: 1px solid #21262d;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+    .header-icon {
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, #238636, #2ea043);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+      box-shadow: 0 0 10px rgba(46,160,67,.35);
+    }
+    .header h1  { font-size: 13px; font-weight: 700; color: #f0f6fc; line-height: 1.2; }
+    .header p   { font-size: 10px; color: #8b949e; margin-top: 1px; }
+
+    /* ── Body ── */
+    .body { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+
+    /* ── Card ── */
+    .card {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .card-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: #8b949e;
+      margin-bottom: 8px;
+    }
+
+    /* ── Form fields ── */
+    label {
+      display: block;
+      font-size: 10px;
+      color: #8b949e;
+      margin-bottom: 3px;
+      font-weight: 500;
+    }
+    input[type=text], input[type=url] {
+      width: 100%;
+      padding: 6px 9px;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: #c9d1d9;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    input[type=text]:focus,
+    input[type=url]:focus {
+      border-color: #2ea043;
+      box-shadow: 0 0 0 3px rgba(46,160,67,.15);
+    }
+
+    /* ── Two-column row ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    /* ── Browser ID row ── */
+    .id-row { display: flex; gap: 6px; }
+    .id-row input {
+      flex: 1;
+      background: #0d1117;
+      color: #58a6ff;
+      cursor: default;
+    }
+    .btn-icon {
+      padding: 6px 10px;
+      background: #21262d;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      color: #8b949e;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      flex-shrink: 0;
+    }
+    .btn-icon:hover { background: #30363d; color: #c9d1d9; }
+
+    /* ── Status ── */
+    .status-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .status-row.ok    { background: #0f2c16; color: #3fb950; border: 1px solid #238636; }
+    .status-row.error { background: #2d0f0f; color: #f85149; border: 1px solid #da3633; }
+    .status-row.idle  { background: #161b22; color: #8b949e; border: 1px solid #21262d; }
+    .dot {
+      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+    }
+    .dot.ok    { background: #3fb950; box-shadow: 0 0 6px #3fb950; }
+    .dot.error { background: #f85149; box-shadow: 0 0 6px #f85149; }
+    .dot.idle  { background: #484f58; }
+
+    /* ── Register button ── */
+    .btn-register {
+      width: 100%;
+      margin-top: 7px;
+      padding: 7px;
+      background: linear-gradient(135deg, #238636, #2ea043);
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-family: 'Manrope', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: .03em;
+      transition: opacity .15s, transform .1s;
+      box-shadow: 0 2px 8px rgba(46,160,67,.3);
+    }
+    .btn-register:hover   { opacity: .9; }
+    .btn-register:active  { transform: scale(.98); }
+    .btn-register:disabled { opacity: .45; cursor: default; }
+
+    /* ── Log ── */
+    #log {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      max-height: 70px;
+      overflow-y: auto;
+      padding: 6px 8px;
+      background: #0d1117;
+      color: #3fb950;
+      border-radius: 6px;
+      line-height: 1.7;
+      border: 1px solid #21262d;
+    }
+    #log .err { color: #f85149; }
+    #log::-webkit-scrollbar { width: 4px; }
+    #log::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+
+    /* ── Footer ── */
+    .footer {
+      padding: 7px 14px;
+      font-size: 10px;
+      color: #484f58;
+      border-top: 1px solid #21262d;
+      display: flex;
+      justify-content: space-between;
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-icon">🖥</div>
+  <div>
+    <h1>Browser Remote Control</h1>
+    <p>Receive &amp; execute remote commands</p>
+  </div>
+</div>
+
+<div class="body">
+
+  <!-- Browser ID -->
+  <div class="card">
+    <div class="card-title">Browser ID</div>
+    <div class="id-row">
+      <input type="text" id="browserId" readonly>
+      <button class="btn-icon" id="copyId" title="Copy ID">📋</button>
+    </div>
+  </div>
+
+  <!-- Server Settings -->
+  <div class="card">
+    <div class="card-title">Server Settings</div>
+
+    <!-- Row: Server URL + Browser Label side by side -->
+    <div class="two-col" style="margin-bottom:7px">
+      <div>
+        <label for="serverUrl">Server URL</label>
+        <input type="url" id="serverUrl" placeholder="https://your-site.com">
+      </div>
+      <div>
+        <label for="browserLabel">Browser Label</label>
+        <input type="text" id="browserLabel" placeholder="My Chrome">
+      </div>
+    </div>
+
+    <label for="apiKey">API Key</label>
+    <input type="text" id="apiKey" placeholder="brc_…">
+  </div>
+
+  <!-- Status -->
+  <div class="card">
+    <div class="card-title">Connection</div>
+    <div class="status-row idle" id="statusRow">
+      <span class="dot idle" id="statusDot"></span>
+      <span id="statusText">Not configured</span>
+    </div>
+    <button class="btn-register" id="btnRegister">🔗 Register &amp; Connect</button>
+  </div>
+
+  <!-- Log -->
+  <div class="card">
+    <div class="card-title">Activity Log</div>
+    <div id="log"><span style="color:#484f58">— waiting —</span></div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <span>BRC v1.0</span>
+  <span id="pollInterval">poll ~6s</span>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
