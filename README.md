@@ -1,5 +1,5 @@
 # Ai-Browser-Remote-Control
-Система управления браузером через Ai  
+Система управления браузером через Ai  `$allowed_types = [ 'click', 'click_coords', 'scroll', 'type', 'type_nth', 'checkbox', 'radio', 'select', 'navigate', 'eval' ];`
 Нейросеть lp85d.ru отправляет команды в браузер по  API — расширение Chrome получает их и выполняет.   
 Тестовая форма `https://lp85d.ru/test/`  
 Регистрация в системе `https://lp85d.ru/wp-admin/`  
