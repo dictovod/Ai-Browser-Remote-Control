@@ -92,3 +92,6 @@ curl -X POST "https://lp85d.ru/wp-json/brc/v1/command" -H "Authorization: Bearer
 | 5 | Комментарий | textarea |
 
 ![Screenshot_2026-02-13-00-34-34-694_com lp85d brc (1)](https://github.com/user-attachments/assets/40f0b986-4ea4-495d-8a47-dceaa38c3b5d)
+
+<img width="1080" height="2340" alt="image" src="https://github.com/user-attachments/assets/00e2af3c-b78d-42c8-876b-98facdb8408c" />
+
