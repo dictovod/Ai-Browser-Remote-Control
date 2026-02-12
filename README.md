@@ -13,7 +13,8 @@
 Нейросеть lp85d.ru отправляет команды в браузер по  API — расширение Chrome получает их и выполняет.   
 Тестовая форма `https://lp85d.ru/test/`  
 Регистрация в системе `https://lp85d.ru/wp-admin/`  
-Плагин для браузера `https://github.com/dictovod/Ai-Browser-Remote-Control/`  
+Плагин (расширение) для браузера `https://github.com/dictovod/Ai-Browser-Remote-Control/`
+Приложение для Android `https://github.com/dictovod/Ai-Browser-Remote-Control/blob/main/brc-v1.0.apk`  
 <img width="365" height="527" alt="image" src="https://github.com/user-attachments/assets/3ffe969f-ec2c-4bcb-9b9a-a4e789f1c71c" />
 
 Вижу форму. Поля по порядку: 1-Имя, 2-Email, 3-Пароль, 4-Возраст, 5-Комментарий (textarea). Вот все команды для проверки:  
