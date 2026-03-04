@@ -45,7 +45,7 @@ $('copyId').addEventListener( 'click', () => {
   if ( ! id ) return;
   navigator.clipboard.writeText( id ).then( () => {
     $('copyId').textContent = '✓';
-    setTimeout( () => { $('copyId').textContent = ''; }, 1500 );
+    setTimeout( () => { $('copyId').textContent = '📋'; }, 1500 );
   } );
 } );
 
