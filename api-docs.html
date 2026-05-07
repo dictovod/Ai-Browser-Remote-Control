@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Browser Remote Control — API Docs</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0f0f13;
+    --surface:  #16161d;
+    --border:   #2a2a38;
+    --text:     #e2e2f0;
+    --muted:    #7a7a9a;
+    --accent:   #7c6af7;
+    --accent2:  #4fc4cf;
+    --green:    #4ade80;
+    --red:      #f87171;
+    --yellow:   #fbbf24;
+    --code-bg:  #0b0b10;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Glow background ── */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -20vh; left: 50%;
+    transform: translateX(-50%);
+    width: 800px; height: 500px;
+    background: radial-gradient(ellipse, rgba(124,106,247,.12) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 60px 24px 100px;
+  }
+
+  /* ── Header ── */
+  header {
+    margin-bottom: 56px;
+    animation: fadeUp .6s ease both;
+  }
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 10px;
+  }
+  .logo-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 12px;
+    display: grid; place-items: center;
+    font-size: 22px;
+    box-shadow: 0 0 24px rgba(124,106,247,.4);
+  }
+  h1 {
+    font-size: clamp(22px, 4vw, 32px);
+    font-weight: 800;
+    letter-spacing: -.5px;
+    line-height: 1.1;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    margin-top: 6px;
+    letter-spacing: .02em;
+  }
+
+  /* ── Section ── */
+  .section {
+    margin-bottom: 48px;
+    animation: fadeUp .6s ease both;
+  }
+  .section:nth-child(2) { animation-delay: .08s; }
+  .section:nth-child(3) { animation-delay: .16s; }
+  .section:nth-child(4) { animation-delay: .24s; }
+  .section:nth-child(5) { animation-delay: .32s; }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    letter-spacing: -.3px;
+  }
+  p { color: var(--muted); font-size: 14px; line-height: 1.7; margin-bottom: 12px; }
+
+  /* ── Code blocks ── */
+  .code-wrap {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .code-header {
+    background: var(--surface);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .copy-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .copy-btn.copied { border-color: var(--green); color: var(--green); }
+
+  pre {
+    background: var(--code-bg);
+    padding: 18px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 2;
+    overflow-x: auto;
+    color: #c9d1d9;
+    tab-size: 2;
+  }
+  .c-comment { color: #6e7681; }
+  .c-url     { color: #79c0ff; }
+  .c-key     { color: #7c6af7; }
+  .c-val     { color: #4ade80; }
+  .c-str     { color: #a5d6ff; }
+  .c-dim     { color: #8b949e; }
+
+  /* ── Table ── */
+  .table-wrap {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead { background: var(--surface); }
+  th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(42,42,56,.6);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+  tr:hover td { background: rgba(124,106,247,.05); }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    background: rgba(124,106,247,.12);
+    color: var(--accent);
+    padding: 2px 7px;
+    border-radius: 5px;
+  }
+  .badge {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: .05em;
+  }
+  .badge-purple { background: rgba(124,106,247,.15); color: #a78bfa; border: 1px solid rgba(124,106,247,.3); }
+  .badge-cyan   { background: rgba(79,196,207,.12);  color: #67e8f9;  border: 1px solid rgba(79,196,207,.25); }
+
+  .td-url {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    word-break: break-all;
+    line-height: 1.8;
+  }
+  .td-url .base { color: var(--accent2); }
+  .td-url .params { color: var(--muted); }
+  .td-url:hover .params { color: var(--text); }
+
+  .td-desc { color: var(--muted); font-size: 12px; }
+
+  /* ── Response box ── */
+  .response-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 20px;
+  }
+  @media (max-width: 640px) { .response-grid { grid-template-columns: 1fr; } }
+  .resp-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .resp-card-head {
+    background: var(--surface);
+    padding: 8px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .resp-card pre { font-size: 11px; line-height: 1.8; padding: 14px; }
+
+  /* ── Note ── */
+  .note {
+    background: rgba(124,106,247,.07);
+    border: 1px solid rgba(124,106,247,.2);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .note strong { color: var(--text); }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <header>
+    <div class="logo-row">
+      <div class="logo-icon">🖥</div>
+      <div>
+        <h1>Browser Remote Control</h1>
+        <div class="subtitle">API Reference — v1</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Section 1: Two ways -->
+  <div class="section">
+    <div class="section-title">Обзор</div>
+    <h2>Два способа отправки команд</h2>
+    <p>Пользователи могут использовать любой из двух способов в зависимости от задачи.</p>
+
+    <div class="response-grid" style="margin-bottom:24px;">
+      <div class="resp-card">
+        <div class="resp-card-head" style="color:#7c6af7;">Способ 1 — REST API</div>
+        <div style="padding:14px 16px;font-size:13px;color:var(--muted);line-height:1.7;">
+          POST-запросы через <code>wp-json/brc/v1/command</code>. Подходит для curl, скриптов, n8n, Make, любого HTTP-клиента.
+        </div>
+      </div>
+      <div class="resp-card">
+        <div class="resp-card-head" style="color:#4fc4cf;">Способ 2 — GET API</div>
+        <div style="padding:14px 16px;font-size:13px;color:var(--muted);line-height:1.7;">
+          Простые GET-запросы через <code>lp85d.ru/api/</code>. Вставляй в браузер, Zapier, no-code инструмент.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: curl examples -->
+  <div class="section">
+    <div class="section-title">Способ 1</div>
+    <h2>REST API — curl / HTTP-клиент</h2>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-lang">bash</span>
+        <button class="copy-btn" onclick="copyBlock(this)">Copy</button>
+      </div>
+      <pre id="curl-block"><span class="c-comment"># scroll</span>
+curl -X POST <span class="c-str">"https://lp85d.ru/wp-json/brc/v1/command"</span> \
+  -H <span class="c-str">"Authorization: Bearer YOUR_API_KEY"</span> \
+  -H <span class="c-str">"Content-Type: application/json"</span> \
+  -d <span class="c-str">'{"browser_id":"YOUR_BROWSER_ID","command":{"type":"scroll","direction":"down","amount":300}}'</span>
+
+<span class="c-comment"># type</span>
+curl -X POST <span class="c-str">"https://lp85d.ru/wp-json/brc/v1/command"</span> \
+  -H <span class="c-str">"Authorization: Bearer YOUR_API_KEY"</span> \
+  -H <span class="c-str">"Content-Type: application/json"</span> \
+  -d <span class="c-str">'{"browser_id":"YOUR_BROWSER_ID","command":{"type":"type","selector":"input[name=email]","value":"test@example.com","clear":true}}'</span>
+
+<span class="c-comment"># click</span>
+curl -X POST <span class="c-str">"https://lp85d.ru/wp-json/brc/v1/command"</span> \
+  -H <span class="c-str">"Authorization: Bearer YOUR_API_KEY"</span> \
+  -H <span class="c-str">"Content-Type: application/json"</span> \
+  -d <span class="c-str">'{"browser_id":"YOUR_BROWSER_ID","command":{"type":"click","selector":"button[type=submit]"}}'</span>
+
+<span class="c-comment"># navigate</span>
+curl -X POST <span class="c-str">"https://lp85d.ru/wp-json/brc/v1/command"</span> \
+  -H <span class="c-str">"Authorization: Bearer YOUR_API_KEY"</span> \
+  -H <span class="c-str">"Content-Type: application/json"</span> \
+  -d <span class="c-str">'{"browser_id":"YOUR_BROWSER_ID","command":{"type":"navigate","url":"https://lp85d.ru/test/"}}'</span>
+
+<span class="c-comment"># eval</span>
+curl -X POST <span class="c-str">"https://lp85d.ru/wp-json/brc/v1/command"</span> \
+  -H <span class="c-str">"Authorization: Bearer YOUR_API_KEY"</span> \
+  -H <span class="c-str">"Content-Type: application/json"</span> \
+  -d <span class="c-str">'{"browser_id":"YOUR_BROWSER_ID","command":{"type":"eval","code":"document.title"}}'</span>
+
+<span class="c-comment"># screenshot</span>
+curl -X POST <span class="c-str">"https://lp85d.ru/wp-json/brc/v1/command"</span> \
+  -H <span class="c-str">"Authorization: Bearer YOUR_API_KEY"</span> \
+  -H <span class="c-str">"Content-Type: application/json"</span> \
+  -d <span class="c-str">'{"browser_id":"YOUR_BROWSER_ID","command":{"type":"screenshot"}}'</span></pre>
+    </div>
+  </div>
+
+  <!-- Section 3: GET table -->
+  <div class="section">
+    <div class="section-title">Способ 2</div>
+    <h2>GET API — <code style="font-size:16px;">lp85d.ru/api/</code></h2>
+    <p>Простые GET-запросы без curl. Вставляй в браузер, скрипт или no-code инструмент.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Тип команды</th>
+            <th>Пример URL</th>
+            <th>Описание</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge-purple">scroll</span></td>
+            <td class="td-url"><span class="base">https://lp85d.ru/api/</span><span class="params">?browser_id=YOUR_BROWSER_ID&amp;token=YOUR_API_KEY&amp;allowed_types=scroll&amp;amount=3000</span></td>
+            <td class="td-desc">Скролл вниз на 3000px</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-purple">scroll ↑</span></td>
+            <td class="td-url"><span class="base">https://lp85d.ru/api/</span><span class="params">?browser_id=YOUR_BROWSER_ID&amp;token=YOUR_API_KEY&amp;allowed_types=scroll&amp;amount=500&amp;direction=up</span></td>
+            <td class="td-desc">Скролл вверх на 500px</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-purple">type</span></td>
+            <td class="td-url"><span class="base">https://lp85d.ru/api/</span><span class="params">?browser_id=YOUR_BROWSER_ID&amp;token=YOUR_API_KEY&amp;allowed_types=type&amp;selector=input[name=email]&amp;value=test@example.com</span></td>
+            <td class="td-desc">Ввод текста по CSS-селектору</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-purple">type_nth</span></td>
+            <td class="td-url"><span class="base">https://lp85d.ru/api/</span><span class="params">?browser_id=YOUR_BROWSER_ID&amp;token=YOUR_API_KEY&amp;allowed_types=type_nth&amp;nth=3&amp;value=Привет</span></td>
+            <td class="td-desc">Ввод в 3-е поле на странице</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-purple">click</span></td>
+            <td class="td-url"><span class="base">https://lp85d.ru/api/</span><span class="params">?browser_id=YOUR_BROWSER_ID&amp;token=YOUR_API_KEY&amp;allowed_types=click&amp;selector=button[type=submit]</span></td>
+            <td class="td-desc">Клик по элементу</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-purple">click_coords</span></td>
+            <td class="td-url"><span class="base">https://lp85d.ru/api/</span><span class="params">?browser_id=YOUR_BROWSER_ID&amp;token=YOUR_API_KEY&amp;allowed_types=click_coords&amp;x=640&amp;y=360</span></td>
+            <td class="td-desc">Клик по координатам</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-purple">navigate</span></td>
+            <td class="td-url"><span class="base">https://lp85d.ru/api/</span><span class="params">?browser_id=YOUR_BROWSER_ID&amp;token=YOUR_API_KEY&amp;allowed_types=navigate&amp;url=https://lp85d.ru/test/</span></td>
+            <td class="td-desc">Переход на страницу</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-purple">select</span></td>
+            <td class="td-url"><span class="base">https://lp85d.ru/api/</span><span class="params">?browser_id=YOUR_BROWSER_ID&amp;token=YOUR_API_KEY&amp;allowed_types=select&amp;selector=select[name=country]&amp;value=Германия</span></td>
+            <td class="td-desc">Выбор значения в дропдауне</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-purple">checkbox</span></td>
+            <td class="td-url"><span class="base">https://lp85d.ru/api/</span><span class="params">?browser_id=YOUR_BROWSER_ID&amp;token=YOUR_API_KEY&amp;allowed_types=checkbox&amp;selector=input[name=agree]&amp;checked=true</span></td>
+            <td class="td-desc">Чекбокс вкл/выкл</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-purple">radio</span></td>
+            <td class="td-url"><span class="base">https://lp85d.ru/api/</span><span class="params">?browser_id=YOUR_BROWSER_ID&amp;token=YOUR_API_KEY&amp;allowed_types=radio&amp;selector=input[value=female]</span></td>
+            <td class="td-desc">Радиокнопка</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-purple">eval</span></td>
+            <td class="td-url"><span class="base">https://lp85d.ru/api/</span><span class="params">?browser_id=YOUR_BROWSER_ID&amp;token=YOUR_API_KEY&amp;allowed_types=eval&amp;code=document.title</span></td>
+            <td class="td-desc">Выполнить произвольный JS</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-purple">screenshot</span></td>
+            <td class="td-url"><span class="base">https://lp85d.ru/api/</span><span class="params">?browser_id=YOUR_BROWSER_ID&amp;token=YOUR_API_KEY&amp;allowed_types=screenshot</span></td>
+            <td class="td-desc">Скриншот текущей страницы</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note" style="margin-top:16px;">
+      🔐 <div><strong>token</strong> — твой API ключ из вкладки Dashboard. <strong>browser_id</strong> — ID нужного браузера из вкладки Browsers.</div>
+    </div>
+  </div>
+
+  <!-- Section 4: Response -->
+  <div class="section">
+    <div class="section-title">Ответ</div>
+    <h2>Формат ответа</h2>
+    <p>Ответ одинаковый в обоих случаях — JSON с результатом выполнения команды.</p>
+
+    <div class="response-grid">
+      <div class="resp-card">
+        <div class="resp-card-head" style="color:var(--green);">✅ Успех</div>
+        <pre>{
+  <span class="c-key">"status"</span>: <span class="c-val">"sent"</span>,
+  <span class="c-key">"http_code"</span>: <span class="c-val">200</span>,
+  <span class="c-key">"api_response"</span>: {
+    <span class="c-key">"command_id"</span>: <span class="c-val">72</span>,
+    <span class="c-key">"type"</span>: <span class="c-val">"screenshot"</span>,
+    <span class="c-key">"status"</span>: <span class="c-val">"executed"</span>,
+    <span class="c-key">"result"</span>: <span class="c-str">"Screenshot saved,
+downloadId: 814"</span>,
+    <span class="c-key">"waited_sec"</span>: <span class="c-val">6</span>
+  }
+}</pre>
+      </div>
+      <div class="resp-card">
+        <div class="resp-card-head" style="color:var(--red);">❌ Ошибка</div>
+        <pre>{
+  <span class="c-key">"status"</span>: <span class="c-val">"error"</span>,
+  <span class="c-key">"http_code"</span>: <span class="c-val">401</span>,
+  <span class="c-key">"message"</span>: <span class="c-str">"Invalid API key"</span>
+}
+
+<span class="c-comment"># Превышение лимита</span>
+{
+  <span class="c-key">"status"</span>: <span class="c-val">"error"</span>,
+  <span class="c-key">"http_code"</span>: <span class="c-val">429</span>,
+  <span class="c-key">"message"</span>: <span class="c-str">"Rate limit exceeded"</span>
+}</pre>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function copyBlock(btn) {
+  const pre = btn.closest('.code-wrap').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
