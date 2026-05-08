@@ -572,6 +572,16 @@ function runCommandInPage(command) {
     const { type, selector, value } = command;
     if (type==='type') {
       const el=getEl(selector); el.scrollIntoView({block:'center'}); el.focus();
+      // Уважаем параметр clear (по умолчанию очищаем)
+      if (command.clear !== false) {
+        if (typeof el.value !== 'undefined') {
+          el.value = '';
+          el.dispatchEvent(new Event('input', {bubbles:true}));
+        } else if (el.innerText !== undefined) {
+          el.innerText = '';
+          el.dispatchEvent(new Event('input', {bubbles:true}));
+        }
+      }
       document.execCommand('insertText',false,value);
       if (!el.innerText.includes(value)) el.innerText=value;
       ['input','keydown','keyup','change'].forEach(n=>el.dispatchEvent(new Event(n,{bubbles:true})));
