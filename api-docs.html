@@ -337,11 +337,17 @@ curl -X POST <span class="c-str">"https://lp85d.ru/wp-json/brc/v1/command"</span
   -H <span class="c-str">"Content-Type: application/json"</span> \
   -d <span class="c-str">'{"browser_id":"YOUR_BROWSER_ID","command":{"type":"scroll","direction":"down","amount":300}}'</span>
 
-<span class="c-comment"># type</span>
+<span class="c-comment"># type (очистить и вставить)</span>
 curl -X POST <span class="c-str">"https://lp85d.ru/wp-json/brc/v1/command"</span> \
   -H <span class="c-str">"Authorization: Bearer YOUR_API_KEY"</span> \
   -H <span class="c-str">"Content-Type: application/json"</span> \
   -d <span class="c-str">'{"browser_id":"YOUR_BROWSER_ID","command":{"type":"type","selector":"input[name=email]","value":"test@example.com","clear":true}}'</span>
+
+<span class="c-comment"># type (дописать без очистки)</span>
+curl -X POST <span class="c-str">"https://lp85d.ru/wp-json/brc/v1/command"</span> \
+  -H <span class="c-str">"Authorization: Bearer YOUR_API_KEY"</span> \
+  -H <span class="c-str">"Content-Type: application/json"</span> \
+  -d <span class="c-str">'{"browser_id":"YOUR_BROWSER_ID","command":{"type":"type","selector":"input[name=email]","value":"@gmail.com","clear":false}}'</span>
 
 <span class="c-comment"># click</span>
 curl -X POST <span class="c-str">"https://lp85d.ru/wp-json/brc/v1/command"</span> \
@@ -365,7 +371,7 @@ curl -X POST <span class="c-str">"https://lp85d.ru/wp-json/brc/v1/command"</span
 curl -X POST <span class="c-str">"https://lp85d.ru/wp-json/brc/v1/command"</span> \
   -H <span class="c-str">"Authorization: Bearer YOUR_API_KEY"</span> \
   -H <span class="c-str">"Content-Type: application/json"</span> \
-  -d <span class="c-str">'{"browser_id":"YOUR_BROWSER_ID","command":{"type":"screenshot"}}'</span></pre>
+  -d <span class="c-str">'{"browser_id":"YOUR_BROWSER_ID","command":{"type":"screenshot"}}</span></pre>
     </div>
   </div>
 
@@ -398,7 +404,12 @@ curl -X POST <span class="c-str">"https://lp85d.ru/wp-json/brc/v1/command"</span
           <tr>
             <td><span class="badge badge-purple">type</span></td>
             <td class="td-url"><span class="base">https://lp85d.ru/api/</span><span class="params">?browser_id=YOUR_BROWSER_ID&amp;token=YOUR_API_KEY&amp;allowed_types=type&amp;selector=input[name=email]&amp;value=test@example.com</span></td>
-            <td class="td-desc">Ввод текста по CSS-селектору</td>
+            <td class="td-desc">Очистить поле и ввести текст (clear=true по умолчанию)</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-purple">type (дописать)</span></td>
+            <td class="td-url"><span class="base">https://lp85d.ru/api/</span><span class="params">?browser_id=YOUR_BROWSER_ID&amp;token=YOUR_API_KEY&amp;allowed_types=type&amp;selector=input[name=email]&amp;value=@gmail.com&amp;clear=false</span></td>
+            <td class="td-desc">Дописать текст, не очищая поле</td>
           </tr>
           <tr>
             <td><span class="badge badge-purple">type_nth</span></td>
@@ -450,7 +461,8 @@ curl -X POST <span class="c-str">"https://lp85d.ru/wp-json/brc/v1/command"</span
     </div>
 
     <div class="note" style="margin-top:16px;">
-      🔐 <div><strong>token</strong> — твой API ключ из вкладки Dashboard. <strong>browser_id</strong> — ID нужного браузера из вкладки Browsers.</div>
+      🔐 <div><strong>token</strong> — твой API ключ из вкладки Dashboard. <strong>browser_id</strong> — ID нужного браузера из вкладки Browsers.<br>
+      🧹 <strong>clear</strong> — для команды <code>type</code> (по умолчанию <code>true</code>): если <code>true</code> — поле полностью очищается перед вставкой; <code>false</code> — текст дописывается к существующему.</div>
     </div>
   </div>
 
