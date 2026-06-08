@@ -377,6 +377,8 @@ function readGeminiDOM( prevCount, prevText ) {
       '.model-response-text',
       'ms-chat-turn model-response',
       '.response-container',
+      'response-container',
+      '[data-response-index]',
     ];
     var els = [];
     for ( var i = 0; i < sels.length; i++ ) {
@@ -390,7 +392,8 @@ function readGeminiDOM( prevCount, prevText ) {
 
     var last = els[els.length - 1];
     var text = ( last.innerText || last.textContent || '' ).trim();
-    if ( !text || text.length < 30 ) return '{"s":"wait","n":' + text.length + ',"total":' + els.length + '}';
+    // ИСПРАВЛЕНИЕ: порог снижен с 30 до 5 — короткие ответы типа «привёт Денис» не застревают
+    if ( !text || text.length < 5 ) return '{"s":"wait","n":' + text.length + ',"total":' + els.length + '}';
 
     var isTyping = !! (
       document.querySelector('.typing-indicator') ||
@@ -402,7 +405,8 @@ function readGeminiDOM( prevCount, prevText ) {
     );
 
     if ( prevText && text === prevText ) {
-      return '{"s":"wait","n":' + text.length + ',"total":' + els.length + ',"unchanged":true}';
+      // ИСПРАВЛЕНИЕ: возвращаем t чтобы Kotlin мог сравнить текст с textBefore
+      return '{"s":"wait","n":' + text.length + ',"total":' + els.length + ',"unchanged":true,"t":' + JSON.stringify(text.substring(0, 200)) + '}';
     }
 
     // ── КАРТИНКИ ────────────────────────────────────────────────────────────
